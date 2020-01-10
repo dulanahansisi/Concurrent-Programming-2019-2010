@@ -1,0 +1,10 @@
+range BALANCE = 5..5
+range TRANSACTION = 1..1
+range ALLTRANSACTION = 1..1
+range BALANCENEW = 3..7
+range DEPOSIT = 1..1
+
+UNIVERSITY = EXISTINGAMOUNT,
+EXISTINGAMOUNT = (readBalance[balance:BALANCE] ->EXISTINGAMOUNT| withdrawMoney[balance:BALANCE][transaction:TRANSACTION] ->subtractMoney[transaction]->calculateBalance[balance-transaction]->
+NEWBALANCE[balance-transaction]),
+NEWBALANCE[balance:BALANCENEW] = (updateAccount [balance] -> EXISTINGAMOUNT)+{giveADiscount}.

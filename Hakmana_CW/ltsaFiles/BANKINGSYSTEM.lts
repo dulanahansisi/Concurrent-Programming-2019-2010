@@ -1,0 +1,35 @@
+range BALANCE = 5..5
+range TRANSACTION = 1..1
+range BALANCENEW = 3..7
+range DEPOSIT = 1..1
+
+UNIVERSITY = EXISTINGAMOUNT,
+EXISTINGAMOUNT = (readBalance[balance:BALANCE] ->EXISTINGAMOUNT| withdrawMoney[balance:BALANCE][transaction:TRANSACTION] ->subtractMoney[transaction]->calculateBalance[balance-transaction]->
+NEWBALANCE[balance-transaction]),
+NEWBALANCE[balance:BALANCENEW] = (updateAccount [balance] -> EXISTINGAMOUNT)+{giveADiscount}.
+
+STUDENT = EXISTINGAMOUNT,
+EXISTINGAMOUNT = (readBalance[balance:BALANCE]->EXISTINGAMOUNT
+| withdrawMoney[balance:BALANCE][transaction:TRANSACTION]->subtractMoney[transaction]->calculateBalance[balance-transaction]->NEWBALANCE[balance-transaction]|withdrawMoney[balance:BALANCE][transaction:TRANSACTION] ->buyNewPhone->subtractMoney[transaction]->calculateBalance[balance-transaction] ->NEWBALANCE[balance-transaction]),
+NEWBALANCE[balance:BALANCENEW] = (updateAccount[balance]->EXISTINGAMOUNT)\{buyNewPhone}.
+
+
+LOANCOMPANY = EXISTINGAMOUNT,
+EXISTINGAMOUNT = (readBalance[balance:BALANCE]->EXISTINGAMOUNT | depositMoney[balance:BALANCE][amount:DEPOSIT]->calculateBalance[balance+amount]->NEWBALANCE[balance+amount]),
+NEWBALANCE[balance:BALANCENEW] = (updateAccount[balance]->EXISTINGAMOUNT).
+
+GRANDMOTHER = EXISTINGAMOUNT,
+EXISTINGAMOUNT = (readBalance[balance:BALANCE] ->EXISTINGAMOUNT|addingBirthdayMoney[balance:BALANCE][amount:DEPOSIT]->calculateBalance[balance+amount] ->NEWBALANCE[balance+amount]
+|depositMoney[balance:BALANCE][amount:DEPOSIT]->calculateBalance[balance+amount]->NEWBALANCE[balance+amount]),
+NEWBALANCE[balance:BALANCENEW] = (updateAccount[balance]->EXISTINGAMOUNT)+{sendBDayCard}.
+
+BANKACCOUNT = EXISTINGAMOUNT,
+EXISTINGAMOUNT = (readAccBalance[balance:BALANCE]->EXISTINGAMOUNT |withdrawAccMoney->calculateAccBalance->NEWBALANCE|depositAccMoney->calculateAccBalance->NEWBALANCE),
+NEWBALANCE = (updateAccBalance->EXISTINGAMOUNT).
+
+
+||BANKINGSYSTEM = (a:STUDENT/{withdrawAccMoney/a.withdrawMoney,readAccBalance/a.readBalance}
+|| b:GRANDMOTHER/{depositAccMoney/b.depositMoney,readAccBalance/b.readBalance}
+|| c:LOANCOMPANY/{depositAccMoney/c.depositMoney,readAccBalance/c.readBalance}
+|| d:UNIVERSITY/{withdrawAccMoney/d.withdrawMoney,readAccBalance/d.readBalance}
+||{a,b,c,d}::BANKACCOUNT)@{read,deposit,withdraw}.
